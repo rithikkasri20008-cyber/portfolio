@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janani | Data Analyst</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Space Grotesk', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand': {
+                            50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4',
+                            300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6',
+                            600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root { --cursor-size: 20px; --cursor-hover-size: 60px; }
+        * { cursor: none; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; overflow-x: hidden; }
+        .cursor { width: var(--cursor-size); height: var(--cursor-size); border: 2px solid #14b8a6; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: width 0.3s, height 0.3s, background 0.3s; transform: translate(-50%, -50%); mix-blend-mode: difference; }
+        .cursor.hover { width: var(--cursor-hover-size); height: var(--cursor-hover-size); background: rgba(20, 184, 166, 0.1); }
+        .cursor-dot { width: 6px; height: 6px; background: #14b8a6; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
+        .noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: float 8s ease-in-out infinite; }
+        .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #14b8a6, #2dd4bf); z-index: 100; transition: width 0.1s; }
+        .tilt-card { transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        .tilt-card-content { transform: translateZ(30px); }
+        .marquee-container { overflow: hidden; white-space: nowrap; }
+        .marquee-content { display: inline-flex; animation: marquee 20s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .timeline-line { position: absolute; left: 50%; transform: translateX(-50%); width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, #14b8a6, transparent); }
+        .image-mask { clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%); transition: clip-path 0.5s ease; }
+        .image-mask:hover { clip-path: polygon(0 0, 100% 0, 100% 100%, 100% 100%, 0 100%); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #14b8a6; border-radius: 4px; }
+        ::selection { background: rgba(20, 184, 166, 0.3); color: #fff; }
+        .nav-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .text-stroke { -webkit-text-stroke: 2px rgba(20, 184, 166, 0.3); color: transparent; }
+        #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        section { position: relative; z-index: 2; }
+        .loader { position: fixed; inset: 0; background: #0a0a0a; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s, visibility 0.8s; }
+        .loader.hidden { opacity: 0; visibility: hidden; }
+        .loader-text { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: #14b8a6; animation: pulse 1.5s ease-in-out infinite; }
+        .magnetic-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; }
+        .glitch:hover::before { animation: glitch-1 0.3s linear infinite; color: #ff00ff; z-index: -1; opacity: 0.8; }
+        .glitch:hover::after { animation: glitch-2 0.3s linear infinite; color: #00ffff; z-index: -2; opacity: 0.8; }
+        @keyframes glitch-1 { 0%, 100% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 40% { transform: translate(-3px, -3px); } 60% { transform: translate(3px, 3px); } 80% { transform: translate(3px, -3px); } }
+        @keyframes glitch-2 { 0%, 100% { transform: translate(0); } 20% { transform: translate(3px, -3px); } 40% { transform: translate(3px, 3px); } 60% { transform: translate(-3px, -3px); } 80% { transform: translate(-3px, 3px); } }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="loader" id="loader"><div class="loader-text">&lt;Janani /&gt;</div></div>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="noise"></div>
+    <div class="scroll-progress" id="scroll-progress"></div>
+    <canvas id="particles"></canvas>
+
+    <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="#" class="font-display text-2xl font-bold text-brand-400 hover-trigger">&lt;Janani /&gt;</a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#about" class="text-sm font-medium text-gray-400 hover:text-brand-400 transition-colors hover-trigger">About</a>
+                    <a href="#skills" class="text-sm font-medium text-gray-400 hover:text-brand-400 transition-colors hover-trigger">Skills</a>
+                    <a href="#projects" class="text-sm font-medium text-gray-400 hover:text-brand-400 transition-colors hover-trigger">Projects</a>
+                    <a href="#experience" class="text-sm font-medium text-gray-400 hover:text-brand-400 transition-colors hover-trigger">Experience</a>
+                    <a href="#contact" class="magnetic-btn px-6 py-2.5 bg-brand-600 text-white text-sm font-medium rounded-full hover:bg-brand-500 transition-colors hover-trigger">Let's Talk</a>
+                </div>
+                <button id="menu-toggle" class="md:hidden text-white hover-trigger"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="fixed inset-0 bg-black/95 z-40 hidden flex-col items-center justify-center gap-8">
+        <a href="#about" class="text-2xl font-display font-bold text-white hover:text-brand-400 transition-colors mobile-link">About</a>
+        <a href="#skills" class="text-2xl font-display font-bold text-white hover:text-brand-400 transition-colors mobile-link">Skills</a>
+        <a href="#projects" class="text-2xl font-display font-bold text-white hover:text-brand-400 transition-colors mobile-link">Projects</a>
+        <a href="#experience" class="text-2xl font-display font-bold text-white hover:text-brand-400 transition-colors mobile-link">Experience</a>
+        <a href="#contact" class="text-2xl font-display font-bold text-brand-400 mobile-link">Let's Talk</a>
+    </div>
+
+    <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="orb w-96 h-96 bg-brand-600/30 top-20 -left-20"></div>
+        <div class="orb w-80 h-80 bg-purple-600/20 bottom-20 -right-20" style="animation-delay: 2s;"></div>
+        <div class="orb w-64 h-64 bg-pink-600/20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style="animation-delay: 4s;"></div>
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-brand-400">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>Available for work
+                </div>
+                <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
+                    <span class="block text-white">HELLO,</span>
+                    <span class="block text-white">I'M</span>
+                    <span class="block glitch text-stroke" data-text="JANANI">JANANI</span>
+                </h1>
+                <div class="h-16">
+                    <span id="typewriter" class="font-display text-2xl md:text-4xl font-bold text-brand-400"></span>
+                    <span class="animate-pulse text-brand-400">|</span>
+                </div>
+                <p class="text-lg text-gray-400 max-w-lg leading-relaxed">I am a Diploma student in Computer Engineering passionate about Data Analysis, Backend Development, and building practical applications with Python.</p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#projects" class="magnetic-btn group px-8 py-4 bg-brand-600 text-white font-medium rounded-full hover:bg-brand-500 transition-all hover:shadow-lg hover:shadow-brand-600/25 hover-trigger">View My Work<i data-lucide="arrow-right" class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"></i></a>
+                    <a href="#contact" class="magnetic-btn px-8 py-4 border border-white/20 text-white font-medium rounded-full hover:bg-white/5 transition-all hover-trigger">Contact Me</a>
+                </div>
+                <div class="flex items-center gap-6 pt-4">
+                    <a href="#" class="text-gray-400 hover:text-brand-400 transition-colors hover-trigger"><i data-lucide="github" class="w-6 h-6"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-brand-400 transition-colors hover-trigger"><i data-lucide="linkedin" class="w-6 h-6"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-brand-400 transition-colors hover-trigger"><i data-lucide="twitter" class="w-6 h-6"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-brand-400 transition-colors hover-trigger"><i data-lucide="mail" class="w-6 h-6"></i></a>
+                </div>
+            </div>
+            <div class="relative hidden lg:block">
+                <div class="relative w-full aspect-[3/4] max-w-md mx-auto">
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-purple-600/20 rounded-3xl transform rotate-6"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-purple-600/20 rounded-3xl transform -rotate-3"></div>
+                    <div class="relative image-mask w-full h-full rounded-3xl overflow-hidden border border-white/10">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=face" alt="Janani N" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    </div>
+                    <div class="absolute -top-4 -right-4 px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 animate-float">
+                        <div class="flex items-center gap-2"><i data-lucide="code-2" class="w-5 h-5 text-brand-400"></i><span class="text-sm font-medium">2+ Years</span></div>
+                    </div>
+                    <div class="absolute -bottom-4 -left-4 px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 animate-float" style="animation-delay: 2s;">
+                        <div class="flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 text-yellow-400"></i><span class="text-sm font-medium">50+ Projects</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
+            <span class="text-xs text-gray-500 uppercase tracking-widest">Scroll</span><i data-lucide="chevron-down" class="w-5 h-5 text-brand-400"></i>
+        </div>
+    </section>
+
+    <div class="py-8 border-y border-white/5 bg-black/50">
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">PYTHON</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">SQL</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">MYSQL</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">BACKEND</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">DATA ANALYSIS</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">GITHUB</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">LINUX</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">XAMPP</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">TURBO C</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">PYTHON</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">SQL</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">MYSQL</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">BACKEND</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">DATA ANALYSIS</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">GITHUB</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">LINUX</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">XAMPP</span>
+                <span class="mx-8 text-2xl font-display font-bold text-white/20">TURBO C</span>
+            </div>
+        </div>
+    </div>
+
+    <section id="about" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="relative">
+                    <div class="absolute -top-10 -left-10 text-8xl font-display font-bold text-white/5">01</div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">About <span class="text-brand-400">Me</span></h2>
+                    <div class="space-y-6 text-gray-400 leading-relaxed">
+                        <p>I'm <strong class="text-white">Janani N</strong>, a Diploma student in Computer Engineering with a keen interest in Data Analysis and emerging technologies.</p>
+                        <p>I enjoy working with data, learning new software tools, and improving my technical knowledge through projects and practical learning.</p>
+                        <p>I am a quick learner with good problem-solving and communication skills, seeking opportunities to grow professionally in the IT field.</p>
+                    </div>
+                    <div class="mt-8 grid grid-cols-2 gap-6">
+                        <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="w-8 h-8 text-brand-400 mb-3"></i>
+                            <h4 class="font-display font-bold text-white mb-1">Location</h4>
+                            <p class="text-sm text-gray-400">Coimbatore</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand-500/50 transition-colors">
+                            <i data-lucide="calendar" class="w-8 h-8 text-brand-400 mb-3"></i>
+                            <h4 class="font-display font-bold text-white mb-1">Experience</h4>
+                            <p class="text-sm text-gray-400">2+ Years</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-4 mt-8">
+                            <div class="aspect-square rounded-2xl overflow-hidden border border-white/10">
+                                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop" alt="Coding" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+                                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop" alt="Development" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+                                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop" alt="Workspace" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="aspect-square rounded-2xl overflow-hidden border border-white/10">
+                                <img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=400&fit=crop" alt="Team" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-32 relative bg-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <div class="absolute left-1/2 transform -translate-x-1/2 -top-10 text-8xl font-display font-bold text-white/5">02</div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Tech <span class="text-brand-400">Stack</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Technologies I work with daily to build scalable and performant applications.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="tilt-card group p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="tilt-card-content">
+                        <div class="w-14 h-14 rounded-2xl bg-brand-600/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="layout" class="w-7 h-7 text-brand-400"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-4">Frontend</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Python</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Pandas</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">NumPy</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Matplotlib</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Seaborn</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tilt-card group p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="tilt-card-content">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-600/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="server" class="w-7 h-7 text-purple-400"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-4">Backend</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Backend Development</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Application Development</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Python Development</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Server Side Programming</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tilt-card group p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="tilt-card-content">
+                        <div class="w-14 h-14 rounded-2xl bg-pink-600/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="database" class="w-7 h-7 text-pink-400"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-4">Database</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">MySQL Database</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">SQL Development</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Data Handling</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Database Management</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tilt-card group p-8 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="tilt-card-content">
+                        <div class="w-14 h-14 rounded-2xl bg-orange-600/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="cloud" class="w-7 h-7 text-orange-400"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-4">Tools</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">GitHub</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">IDLE Python</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Turbo C7</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Linux Mint</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">XAMPP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-20 grid md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">Python / Data Analysis</span>
+                            <span class="text-sm text-brand-400">85%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="85" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">Backend Development</span>
+                            <span class="text-sm text-brand-400">80%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="80" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">SQL / Databases</span>
+                            <span class="text-sm text-brand-400">82%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="82" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">Data Visualization</span>
+                            <span class="text-sm text-brand-400">78%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="78" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">Application Development</span>
+                            <span class="text-sm text-brand-400">75%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="75" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-white">Server Side Programming</span>
+                            <span class="text-sm text-brand-400">72%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div class="skill-bar h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" data-width="72" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <div class="absolute left-1/2 transform -translate-x-1/2 -top-10 text-8xl font-display font-bold text-white/5">03</div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Featured <span class="text-brand-400">Projects</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Some of my recent work that showcases my skills and passion for development.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop" alt="Inventory Management System" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 text-xs rounded-full bg-brand-600/30 text-brand-400 border border-brand-500/30">Analytics</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/10 text-gray-300 border border-white/20">Full Stack</span>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-2">Inventory Management System</h3>
+                        <p class="text-sm text-gray-400 mb-4 line-clamp-2">Full-stack inventory system with real-time analytics dashboard, stock prediction, and automated reorder alerts.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs text-gray-500">Python</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Django</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">PostgreSQL</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Pandas</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="#" class="flex items-center gap-2 text-sm text-brand-400 hover:text-brand-300 transition-colors"><i data-lucide="external-link" class="w-4 h-4"></i>Live Demo</a>
+                            <a href="#" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"><i data-lucide="github" class="w-4 h-4"></i>Source</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop" alt="Heart Failure Prediction" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 text-xs rounded-full bg-purple-600/30 text-purple-400 border border-purple-500/30">Healthcare ML</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/10 text-gray-300 border border-white/20">ML Model</span>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-2">Heart Failure Prediction</h3>
+                        <p class="text-sm text-gray-400 mb-4 line-clamp-2">ML-based predictive system that analyzes patient data to assess heart failure risk using classification algorithms.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs text-gray-500">Python</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Scikit-learn</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Pandas</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Streamlit</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="#" class="flex items-center gap-2 text-sm text-brand-400 hover:text-brand-300 transition-colors"><i data-lucide="external-link" class="w-4 h-4"></i>Live Demo</a>
+                            <a href="#" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"><i data-lucide="github" class="w-4 h-4"></i>Source</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-brand-500/50 transition-all duration-500 hover-trigger">
+                    <div class="aspect-video overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=400&fit=crop" alt="Fake News Detection" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 text-xs rounded-full bg-pink-600/30 text-pink-400 border border-pink-500/30">NLP</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/10 text-gray-300 border border-white/20">Deep Learning</span>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-2">Fake News Detection</h3>
+                        <p class="text-sm text-gray-400 mb-4 line-clamp-2">NLP-powered system that classifies news articles as real or fake using text analysis and deep learning models.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs text-gray-500">Python</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">TensorFlow</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">NLTK</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">Flask</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="#" class="flex items-center gap-2 text-sm text-brand-400 hover:text-brand-300 transition-colors"><i data-lucide="external-link" class="w-4 h-4"></i>Live Demo</a>
+                            <a href="#" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"><i data-lucide="github" class="w-4 h-4"></i>Source</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="#" class="magnetic-btn inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white font-medium rounded-full hover:bg-white/5 transition-all hover-trigger">
+                    View All Projects<i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-32 relative bg-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <div class="absolute left-1/2 transform -translate-x-1/2 -top-10 text-8xl font-display font-bold text-white/5">04</div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Work <span class="text-brand-400">Experience</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">My professional journey and the companies I've had the pleasure to work with.</p>
+            </div>
+            <div class="relative max-w-4xl mx-auto">
+                <div class="timeline-line hidden md:block"></div>
+                <div class="relative mb-12 md:mb-0 md:grid md:grid-cols-2 md:gap-12 items-center">
+                    <div class="md:text-right md:pr-12 mb-4 md:mb-0">
+                        <div class="inline-block px-4 py-2 rounded-full bg-brand-600/20 text-brand-400 text-sm font-medium mb-3">Present</div>
+                        <h3 class="font-display text-2xl font-bold text-white mb-2">Data Analyst</h3>
+                        <p class="text-brand-400 font-medium mb-2">App Innovation Pvt Ltd</p>
+                        <p class="text-sm text-gray-500 mb-4">Coimbatore</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">Working on data analysis tasks, building reports, and supporting application development projects using Python and SQL.</p>
+                        <div class="flex flex-wrap gap-2 mt-4 md:justify-end">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Python</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">SQL</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Data Analysis</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Excel</span>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex items-center justify-center">
+                        <div class="w-4 h-4 rounded-full bg-brand-400 border-4 border-black shadow-lg shadow-brand-400/50 z-10"></div>
+                    </div>
+                </div>
+                <div class="relative md:grid md:grid-cols-2 md:gap-12 items-center">
+                    <div class="hidden md:flex items-center justify-center order-1">
+                        <div class="w-4 h-4 rounded-full bg-purple-400 border-4 border-black shadow-lg shadow-purple-400/50 z-10"></div>
+                    </div>
+                    <div class="md:pl-12 mb-4 md:mb-0 order-2">
+                        <div class="inline-block px-4 py-2 rounded-full bg-purple-600/20 text-purple-400 text-sm font-medium mb-3">2023 - 2024</div>
+                        <h3 class="font-display text-2xl font-bold text-white mb-2">Junior Data Analyst</h3>
+                        <p class="text-purple-400 font-medium mb-2">Freelance / Internship</p>
+                        <p class="text-sm text-gray-500 mb-4">Coimbatore</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">Worked on Python development projects, backend scripting, and database management for academic and personal projects.</p>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Python</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">MySQL</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">Backend</span>
+                            <span class="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10">XAMPP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16">
+                <div>
+                    <div class="absolute -top-10 -left-10 text-8xl font-display font-bold text-white/5">05</div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">Get In <span class="text-brand-400">Touch</span></h2>
+                    <p class="text-gray-400 text-lg mb-8 leading-relaxed">Have a project in mind? Let's work together! I'm always open to discussing new projects, creative ideas, or opportunities to be part of your visions.</p>
+                    <div class="space-y-6 mb-12">
+                        <div class="flex items-center gap-4 group hover-trigger">
+                            <div class="w-12 h-12 rounded-xl bg-brand-600/20 flex items-center justify-center group-hover:bg-brand-600/30 transition-colors">
+                                <i data-lucide="mail" class="w-5 h-5 text-brand-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="text-white font-medium">jananinandhakumarjanuu@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 group hover-trigger">
+                            <div class="w-12 h-12 rounded-xl bg-brand-600/20 flex items-center justify-center group-hover:bg-brand-600/30 transition-colors">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-brand-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Location</p>
+                                <p class="text-white font-medium">Coimbatore</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 group hover-trigger">
+                            <div class="w-12 h-12 rounded-xl bg-brand-600/20 flex items-center justify-center group-hover:bg-brand-600/30 transition-colors">
+                                <i data-lucide="phone" class="w-5 h-5 text-brand-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Phone</p>
+                                <p class="text-white font-medium">+91 9443406667</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand-400 hover:border-brand-500/50 transition-all hover-trigger"><i data-lucide="github" class="w-5 h-5"></i></a>
+                        <a href="#" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand-400 hover:border-brand-500/50 transition-all hover-trigger"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                        <a href="#" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand-400 hover:border-brand-500/50 transition-all hover-trigger"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="#" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand-400 hover:border-brand-500/50 transition-all hover-trigger"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <form class="space-y-6 p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Name</label>
+                                <input type="text" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500/50 transition-colors hover-trigger" placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                                <input type="email" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500/50 transition-colors hover-trigger" placeholder="john@example.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Subject</label>
+                            <input type="text" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500/50 transition-colors hover-trigger" placeholder="Project Inquiry">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Message</label>
+                            <textarea rows="5" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500/50 transition-colors resize-none hover-trigger" placeholder="Tell me about your project..."></textarea>
+                        </div>
+                        <button type="submit" class="magnetic-btn w-full py-4 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-500 transition-all hover:shadow-lg hover:shadow-brand-600/25 flex items-center justify-center gap-2 hover-trigger">
+                            <i data-lucide="send" class="w-5 h-5"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="font-display text-2xl font-bold text-brand-400">&lt;Janani /&gt;</span>
+                </div>
+                <p class="text-sm text-gray-500">© 2024 Janani N. Built with passion & data.</p>
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
+                    <span>Made with love in Coimbatore</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        window.addEventListener('load', () => { setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 1500); });
+        
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+        
+        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px'; });
+        
+        function animateCursor() { cursorX += (mouseX - cursorX) * 0.1; cursorY += (mouseY - cursorY) * 0.1; cursor.style.left = cursorX + 'px'; cursor.style.top = cursorY + 'px'; requestAnimationFrame(animateCursor); }
+        animateCursor();
+        
+        document.querySelectorAll('.hover-trigger, a, button').forEach(el => { el.addEventListener('mouseenter', () => cursor.classList.add('hover')); el.addEventListener('mouseleave', () => cursor.classList.remove('hover')); });
+        
+        window.addEventListener('scroll', () => { const scrollTop = window.scrollY; const docHeight = document.documentElement.scrollHeight - window.innerHeight; const scrollPercent = (scrollTop / docHeight) * 100; document.getElementById('scroll-progress').style.width = scrollPercent + '%'; });
+        
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => { if (window.scrollY > 50) { navbar.classList.add('nav-blur', 'bg-black/80'); } else { navbar.classList.remove('nav-blur', 'bg-black/80'); } });
+        
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        let menuOpen = false;
+        
+        menuToggle.addEventListener('click', () => { menuOpen = !menuOpen; if (menuOpen) { mobileMenu.classList.remove('hidden'); mobileMenu.classList.add('flex'); menuToggle.innerHTML = '<i data-lucide=\"x\" class=\"w-6 h-6\"></i>'; } else { mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('flex'); menuToggle.innerHTML = '<i data-lucide=\"menu\" class=\"w-6 h-6\"></i>'; } lucide.createIcons(); });
+        
+        document.querySelectorAll('.mobile-link').forEach(link => { link.addEventListener('click', () => { menuOpen = false; mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('flex'); menuToggle.innerHTML = '<i data-lucide=\"menu\" class=\"w-6 h-6\"></i>'; lucide.createIcons(); }); });
+        
+        const words = ['Data Analyst', 'Python Developer', 'Backend Developer', 'Tech Enthusiast'];
+        let wordIndex = 0, charIndex = 0, isDeleting = false;
+        const typewriter = document.getElementById('typewriter');
+        
+        function typeEffect() { const currentWord = words[wordIndex]; if (isDeleting) { typewriter.textContent = currentWord.substring(0, charIndex - 1); charIndex--; } else { typewriter.textContent = currentWord.substring(0, charIndex + 1); charIndex++; } let typeSpeed = isDeleting ? 50 : 100; if (!isDeleting && charIndex === currentWord.length) { typeSpeed = 2000; isDeleting = true; } else if (isDeleting && charIndex === 0) { isDeleting = false; wordIndex = (wordIndex + 1) % words.length; typeSpeed = 500; } setTimeout(typeEffect, typeSpeed); }
+        typeEffect();
+        
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { if (entry.target.classList.contains('skill-bar')) { const width = entry.target.getAttribute('data-width'); entry.target.style.width = width + '%'; } } }); }, observerOptions);
+        document.querySelectorAll('.skill-bar').forEach(bar => observer.observe(bar));
+        
+        document.querySelectorAll('.tilt-card').forEach(card => { card.addEventListener('mousemove', (e) => { const rect = card.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top; const centerX = rect.width / 2; const centerY = rect.height / 2; const rotateX = (y - centerY) / 20; const rotateY = (centerX - x) / 20; card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`; }); card.addEventListener('mouseleave', () => { card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)'; }); });
+        
+        document.querySelectorAll('.magnetic-btn').forEach(btn => { btn.addEventListener('mousemove', (e) => { const rect = btn.getBoundingClientRect(); const x = e.clientX - rect.left - rect.width / 2; const y = e.clientY - rect.top - rect.height / 2; btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`; }); btn.addEventListener('mouseleave', () => { btn.style.transform = 'translate(0, 0)'; }); });
+        
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.speedX = Math.random() * 0.5 - 0.25; this.speedY = Math.random() * 0.5 - 0.25; this.opacity = Math.random() * 0.5 + 0.1; }
+            update() { this.x += this.speedX; this.y += this.speedY; if (this.x > canvas.width) this.x = 0; if (this.x < 0) this.x = canvas.width; if (this.y > canvas.height) this.y = 0; if (this.y < 0) this.y = canvas.height; }
+            draw() { ctx.fillStyle = `rgba(20, 184, 166, ${this.opacity})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+        
+        function initParticles() { particles = []; for (let i = 0; i < 50; i++) { particles.push(new Particle()); } }
+        initParticles();
+        
+        function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(particle => { particle.update(); particle.draw(); }); requestAnimationFrame(animateParticles); }
+        animateParticles();
+    </script>
+</body>
+</html>
